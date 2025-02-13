@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.pdf.pdfReaderUsingHuggingFace.service.PdfService;
 import com.pdf.pdfReaderUsingHuggingFace.util.PdfReader;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 
 @RestController
@@ -40,7 +41,8 @@ public class PdfController {
         }
     }
 
-    // Endpoint to ask a question based on extracted PDF content
+ 
+     // Endpoint to ask a question based on extracted PDF content
     @PostMapping(value="/answer",consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public String answerQuestion(@RequestParam("file") MultipartFile file, @RequestParam("question") String question) {
         try {
@@ -57,4 +59,44 @@ public class PdfController {
             return "Error processing the PDF: " + e.getMessage();
         }
     }
+    
+    // Endpoint to upload PDF and get summary
+    @PostMapping(value="/creativesummarize",consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String creativeSummarizePdf(@RequestParam("file") MultipartFile file) {
+        try {
+            // Save the uploaded PDF to a temporary file
+            File tempFile = File.createTempFile("uploaded", ".pdf");
+            file.transferTo(tempFile);
+
+            // Extract text from the PDF
+            String extractedText = PdfReader.extractTextFromPdf(tempFile);
+
+            // Summarize the extracted text
+            return pdfService.creativeSummarizeText(extractedText);
+        } catch (IOException e) {
+            return "Error processing the PDF: " + e.getMessage();
+        }
+    }
+
+ 
+     // Endpoint to ask a question based on extracted PDF content
+    @PostMapping(value="/creativeanswer",consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String creativeAnswerQuestion(@RequestParam("file") MultipartFile file, @RequestParam("question") String question) {
+        try {
+            // Save the uploaded PDF to a temporary file
+            File tempFile = File.createTempFile("uploaded", ".pdf");
+            file.transferTo(tempFile);
+
+            // Extract text from the PDF
+            String extractedText = PdfReader.extractTextFromPdf(tempFile);
+
+            // Get the answer for the provided question
+            return pdfService.creativeAnswerQuestion(extractedText, question);
+        } catch (IOException e) {
+            return "Error processing the PDF: " + e.getMessage();
+        }
+    }
 }
+
+
+
